@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Puntería</title>
+     <style>
+          body {
+               text-align: center;
+          }
+          canvas {
+               border: 2px solid black;
+               display: block;
+               margin: 0 auto;
+               background-color: #f2f2f2;
+               }
+               h1 {
+                    font-family: Arial, sans-serif;
+               }
+
+               #score {
+                    font-family: Arial, sans-serif;
+                    font-size: 20px;
+               }
+               #inicioBoton {
+                    font-family: Arial, sans-serif;
+                    font-size: 18px;
+                    padding: 10px 20px;
+                    margin-top: 20px;
+                    cursor: pointer;
+               }
+     </style>
+</head>
+
+<body>
+     <h1>Juego de punteria</h1>
+     <canvas id="gameCanvas" width="800" height="400">
+     </canvas>
+     <p>Tiempo restante: <span id="timeLeft">10</span> Segundos</p>
+     <p>Puntuacion: <span id="score">0</span></p>
+     <button id="inicioBoton" onclick="iniciarJuego()">Iniciar</button>
+     
+     <script>
+          const canvas = document.getElementById('gameCanvas');
+          const ctx = canvas.getContext('2d');
+
+     let score = 0;
+     const targetRadius = 20;
+     let targetX = canvas.width / 2;
+     let targetY = canvas.height / 2;
+     let isGameRunning = false;
+     const gameDuration = 10;
+     let timeLeft = gameDuration;
+
+
+     function dibujarPelota() {
+          ctx.beginPath();
+          ctx.arc(targetX, targetY, targetRadius, 0, Math.PI * 2);
+          ctx.fillStyle = 'green'
+          ctx.fill();
+          ctx.closePath();
+     }
+
+     function desplazamientoAleatorio() {
+          targetX = Math.random() * (canvas.width - 2 * targetRadius) + targetRadius;
+          targetY = Math.random() * (canvas.height - 2 * targetRadius) + targetRadius;
+     }
+
+     function temporizador() {
+          if(timeLeft <= 0){
+               endGame();
+          }else{
+               document.getElementById('timeLeft').textContent = timeLeft;
+               timeLeft--;
+               setTimeout(temporizador, 1000);
+          }
+     }
+
+     function disparo() {
+          if(!isGameRunning) return;
+
+          const rect = canvas.getBoundingClientRect();
+          const mouseX = event.clientX - rect.left;
+          const mouseY = event.clientY - rect.top;
+
+          const distancia = Math.sqrt((targetX - mouseX) ** 2 + (targetY - mouseY) ** 2);
+          
+          if(distancia <= targetRadius){
+               score++;
+               document.getElementById('score').textContent = score;
+               desplazamientoAleatorio();
+          }
+
+     }
+
+     function iniciarJuego() {
+          isGameRunning = true;
+          score = 0;
+          timeLeft = gameDuration;
+          document.getElementById('score').textContent = score;
+          document.getElementById('timeLeft').textContent = timeLeft;
+          document.getElementById('inicioBoton').style.display = 'none';
+          desplazamientoAleatorio();
+          draw();
+          temporizador();
+     }
+
+     function endGame() {
+          isGameRunning = false;
+          alert("Juego finalizado:D, tu puntuacion es: "+score);
+          document.getElementById('inicioBoton').style.display = 'block';
+     }
+
+     function draw() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          dibujarPelota();
+          if(isGameRunning){
+               requestAnimationFrame(draw);
+          }
+     }
+
+     canvas.addEventListener('click', disparo);
+
+     </script>
+</body>
+</html>
